@@ -18,6 +18,6 @@ module com.oracle.adbaoverjdbc {
   requires jdk.incubator.adba;
   requires java.sql;
   uses jdk.incubator.sql2.DataSource;
-  exports com.oracle.adbaoverjdbc;
-  provides jdk.incubator.sql2.DataSourceFactory with com.oracle.adbaoverjdbc.DataSourceFactory;
+  exports org.postgresql.adbaoverjdbc;
+  provides jdk.incubator.sql2.DataSourceFactory with org.postgresql.adbaoverjdbc.DataSourceFactory;
 }

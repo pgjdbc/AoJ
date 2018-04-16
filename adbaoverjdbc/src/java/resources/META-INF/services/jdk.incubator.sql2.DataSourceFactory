@@ -1,1 +1,1 @@
-com.oracle.adbaoverjdbc.DataSourceFactory
+org.postgresql.adbaoverjdbc.DataSourceFactory

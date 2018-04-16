@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.oracle.adbaoverjdbc;
+package org.postgresql.adbaoverjdbc;
 
 import jdk.incubator.sql2.ArrayCountOperation;
 import jdk.incubator.sql2.DynamicMultiOperation;
@@ -219,10 +219,10 @@ class OperationGroup<S, T> extends Operation<T>
   @Override
   public SimpleOperation<TransactionOutcome> endTransactionOperation(Transaction trans) {
     if ( ! isHeld() ) throw new IllegalStateException("TODO");
-    return com.oracle.adbaoverjdbc.SimpleOperation.<TransactionOutcome>newOperation(
+    return SimpleOperation.<TransactionOutcome>newOperation(
               connection, 
               (OperationGroup<Object,T>)this, 
-              op -> connection.jdbcEndTransaction(op, (com.oracle.adbaoverjdbc.Transaction)trans));
+              op -> connection.jdbcEndTransaction(op, (org.postgresql.adbaoverjdbc.Transaction)trans));
   }
 
   @Override
@@ -267,7 +267,7 @@ class OperationGroup<S, T> extends Operation<T>
   
   Submission<S> submit(Operation<S> op) {
     memberTail = op.attachErrorHandler(op.follows(memberTail, getExecutor()));
-    return com.oracle.adbaoverjdbc.Submission.submit(this::cancel, memberTail);
+    return org.postgresql.adbaoverjdbc.Submission.submit(this::cancel, memberTail);
   }
 
   @Override

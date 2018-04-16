@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.oracle.adbaoverjdbc;
-
-import jdk.incubator.sql2.DataSource;
+package org.postgresql.adbaoverjdbc;
 
 /**
  *
  */
-public class DataSourceFactory implements jdk.incubator.sql2.DataSourceFactory {
-
-  @Override
-  public DataSource.Builder builder() {
-    return DataSourceBuilder.newDataSourceBuilder();
+class SqlOperation<T> extends SimpleOperation<T> {
+  
+  static <S> SqlOperation<S> newOperation(Connection conn, OperationGroup<? super S, ?> group, String sql) {
+    return new SqlOperation<>(conn, group, sql);
+  } 
+  
+  protected SqlOperation(Connection conn, OperationGroup<? super T, ?> group, String sql) {
+    super(conn, group, op -> (T)conn.jdbcExecute(op, sql));
   }
-
 }

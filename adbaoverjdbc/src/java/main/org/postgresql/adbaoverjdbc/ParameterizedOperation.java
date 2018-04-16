@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.oracle.adbaoverjdbc;
+package org.postgresql.adbaoverjdbc;
 
 import jdk.incubator.sql2.AdbaType;
 import jdk.incubator.sql2.SqlException;
@@ -23,8 +23,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
-import static com.oracle.adbaoverjdbc.Operation.toSQLType;
-import static com.oracle.adbaoverjdbc.Operation.toSQLType;
+
+import static org.postgresql.adbaoverjdbc.Operation.toSQLType;
 
 /**
  *
@@ -111,7 +111,7 @@ public abstract class ParameterizedOperation<T> extends Operation<T>
                     
     void setByPosition(PreparedStatement stmt, int index) throws SQLException {
       if (type == null) {
-        stmt.setObject(index, value, Operation.toSQLType(value.getClass()));
+        stmt.setObject(index, value, toSQLType(value.getClass()));
       }
       else if (type instanceof AdbaType) {
          stmt.setObject(index, value, toSQLType((AdbaType)type));

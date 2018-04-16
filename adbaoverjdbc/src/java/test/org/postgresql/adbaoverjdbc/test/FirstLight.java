@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.oracle.adbaoverjdbc.test;
+package org.postgresql.adbaoverjdbc.test;
 
 import jdk.incubator.sql2.AdbaType;
 import jdk.incubator.sql2.Connection;
@@ -33,7 +33,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import static com.oracle.adbaoverjdbc.JdbcConnectionProperties.JDBC_CONNECTION_PROPERTIES;
+import static org.postgresql.adbaoverjdbc.JdbcConnectionProperties.JDBC_CONNECTION_PROPERTIES;
+
+import org.postgresql.adbaoverjdbc.JdbcConnectionProperties;
 
 /**
  * This is a quick and dirty test to check if anything at all is working.
@@ -56,7 +58,7 @@ public class FirstLight {
   public static final String TRIVIAL = "SELECT 1";
 
 
-  public static final String FACTORY_NAME = "com.oracle.adbaoverjdbc.DataSourceFactory";
+  public static final String FACTORY_NAME = "org.postgresql.adbaoverjdbc.DataSourceFactory";
 
   public FirstLight() {
   }
@@ -82,7 +84,7 @@ public class FirstLight {
    */
   @Test
   public void firstLight() {
-    assertEquals("com.oracle.adbaoverjdbc.DataSourceFactory",
+    assertEquals("org.postgresql.adbaoverjdbc.DataSourceFactory",
         DataSourceFactory.forName(FACTORY_NAME).getClass().getName());
   }
 

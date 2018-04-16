@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.oracle.adbaoverjdbc;
+package org.postgresql.adbaoverjdbc;
 
 import jdk.incubator.sql2.ParameterizedRowOperation;
 import jdk.incubator.sql2.Result;

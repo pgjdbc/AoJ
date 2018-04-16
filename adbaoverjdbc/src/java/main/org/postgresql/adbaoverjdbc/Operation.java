@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.oracle.adbaoverjdbc;
+package org.postgresql.adbaoverjdbc;
 
 import jdk.incubator.sql2.AdbaType;
 import jdk.incubator.sql2.SqlSkippedException;
@@ -40,7 +40,7 @@ import java.util.function.Consumer;
  * An Operation collects the various properties of the request for work, then
  * constructs one or more CompletionStages that will do the work of the
  * Operation. Finally it connects the CompletionStage(s) to result
- * CompletionStage of the preceeding Operation.
+ * CompletionStage of the preceding Operation.
  *
  */
 abstract class Operation<T> implements jdk.incubator.sql2.Operation<T> {

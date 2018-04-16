@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.oracle.adbaoverjdbc;
+package org.postgresql.adbaoverjdbc;
 
 import jdk.incubator.sql2.AdbaConnectionProperty;
-import jdk.incubator.sql2.Connection.Lifecycle;
 import jdk.incubator.sql2.ConnectionProperty;
 import jdk.incubator.sql2.Operation;
 import jdk.incubator.sql2.ShardingKey;
@@ -85,7 +84,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
     if (! isHeld()) {
       throw new IllegalStateException("TODO");
     }
-    return com.oracle.adbaoverjdbc.SimpleOperation.<Void>newOperation(this, this, this::jdbcConnect);
+    return SimpleOperation.<Void>newOperation(this, this, this::jdbcConnect);
   }
 
   @Override
@@ -93,7 +92,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
     if (! isHeld()) {
       throw new IllegalStateException("TODO");
     }
-    return com.oracle.adbaoverjdbc.SimpleOperation.<Void>newOperation(this, this, op -> jdbcValidate(op, depth));
+    return SimpleOperation.<Void>newOperation(this, this, op -> jdbcValidate(op, depth));
   }
 
   @Override
@@ -101,7 +100,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
     if (! isHeld()) {
       throw new IllegalStateException("TODO");
     }
-    return com.oracle.adbaoverjdbc.UnskippableOperation.<Void>newOperation(this, this, this::jdbcClose);  //TODO cannot be skipped
+    return UnskippableOperation.<Void>newOperation(this, this, this::jdbcClose);  //TODO cannot be skipped
   }
 
   @Override
@@ -214,11 +213,11 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
   }
 
   @Override
-  jdk.incubator.sql2.Submission<Object> submit(com.oracle.adbaoverjdbc.Operation<Object> op) {
+  jdk.incubator.sql2.Submission<Object> submit(org.postgresql.adbaoverjdbc.Operation<Object> op) {
     if (op == this) {
       // submitting the Connection OperationGroup
       connectionCF = (CompletableFuture<Object>)attachErrorHandler(op.follows(ROOT, getExecutor()));
-      return com.oracle.adbaoverjdbc.Submission.submit(this::cancel, connectionCF);
+      return Submission.submit(this::cancel, connectionCF);
     }
     else {
       return super.submit(op);
@@ -247,7 +246,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
     }
   }
 
-  private Void jdbcValidate(com.oracle.adbaoverjdbc.Operation<Void> op,
+  private Void jdbcValidate(org.postgresql.adbaoverjdbc.Operation<Void> op,
                             Validation depth) {
     try {
     switch (depth) {
@@ -276,7 +275,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
   }
   
   
-  protected <T> T jdbcExecute(com.oracle.adbaoverjdbc.Operation<T> op, String sql) {
+  protected <T> T jdbcExecute(org.postgresql.adbaoverjdbc.Operation<T> op, String sql) {
     try (java.sql.Statement stmt = jdbcConnection.createStatement()) {
       int timeoutSeconds = (int) (op.getTimeoutMillis() / 1000L);
       if (timeoutSeconds < 0) stmt.setQueryTimeout(timeoutSeconds);
