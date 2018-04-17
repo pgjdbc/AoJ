@@ -28,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collector;
 
 /**
@@ -40,7 +42,7 @@ import java.util.stream.Collector;
 class RowOperation<T>  extends ParameterizedOperation<T> 
         implements jdk.incubator.sql2.ParameterizedRowOperation<T> {
 
-  
+  private static final Logger LOGGER = Logger.getLogger("org.postgresql.adbaoverjdbc.RowOperation");
   private static final int NOT_SET = -1;
   static final Collector DEFAULT_COLLECTOR = Collector.of(
           () -> null,
@@ -128,7 +130,7 @@ class RowOperation<T>  extends ParameterizedOperation<T>
       setParameters.forEach((String k, ParameterValue v) -> {
         v.set(jdbcStatement, k);
       });
-      System.out.println("executeQuery(\"" + sqlString + "\")");
+      LOGGER.log(Level.FINE,"executeQuery(\"" + sqlString + "\")");
       resultSet = jdbcStatement.executeQuery();
       accumulator = collector.supplier().get();
       rowsRemain = true;
@@ -187,7 +189,7 @@ class RowOperation<T>  extends ParameterizedOperation<T>
         if (resultSet == null) {
           throw new IllegalStateException("TODO");
         }
-        System.out.println("ResultSet.getMetaData()"); //DEBUG
+        LOGGER.log(Level.FINE,"ResultSet.getMetaData()"); //DEBUG
         ResultSetMetaData md = resultSet.getMetaData();
         int count = md.getColumnCount();
         identifiers = new String[count];

@@ -26,6 +26,8 @@ import java.util.Properties;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.stream.Collector;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -56,6 +58,7 @@ public class FirstLight {
   public static final String PASSWORD = "test"; //<database user password>";
   // Define this to be the most trivial SELECT possible
   public static final String TRIVIAL = "SELECT 1";
+  private static final Logger LOGGER = Logger.getLogger("org.postgresql.adbaoverjdbc.test.FirstLight");
 
 
   public static final String FACTORY_NAME = "org.postgresql.adbaoverjdbc.DataSourceFactory";
@@ -117,7 +120,7 @@ public class FirstLight {
         .password(PASSWORD)
         .connectionProperty(JDBC_CONNECTION_PROPERTIES, props)
         .build();
-    Connection conn = ds.getConnection(t -> System.out.println("ERROR: " + t.getMessage()));
+    Connection conn = ds.getConnection(t -> LOGGER.log(Level.FINE,"ERROR: " + t.getMessage()));
     try (conn) {
       assertNotNull(conn);
       conn.operation(TRIVIAL).submit();
@@ -139,12 +142,12 @@ public class FirstLight {
         .password(PASSWORD)
         .connectionProperty(JDBC_CONNECTION_PROPERTIES, props)
         .build();
-         Connection conn = ds.getConnection(t -> System.out.println("ERROR: " + t.getMessage()))) {
+         Connection conn = ds.getConnection(t -> LOGGER.log(Level.FINE,"ERROR: " + t.getMessage()))) {
       assertNotNull(conn);
       conn.<Void>rowOperation(TRIVIAL)
           .collect(Collector.of(() -> null,
               (a, r) -> {
-                System.out.println("Trivial: " + r.get("1", String.class));
+                LOGGER.log(Level.FINE,"Trivial: " + r.get("1", String.class));
               },
               (x, y) -> null))
           .submit();
@@ -158,14 +161,14 @@ public class FirstLight {
               a -> (Integer)a[0]))
           .submit()
           .getCompletionStage()
-          .thenAccept( n -> {System.out.println("labor cost: " + n);})
+          .thenAccept( n -> {LOGGER.log(Level.FINE,"labor cost: " + n);})
           .toCompletableFuture();
       conn.<Integer>rowOperation("select * from emp where empno = ?")
           .set("1", 7782)
           .collect(Collector.of(
               () -> null,
               (a, r) -> {
-                System.out.println("salary: $" + r.get("sal", Integer.class));
+                LOGGER.log(Level.FINE,"salary: $" + r.get("sal", Integer.class));
               },
               (l, r) -> null))
           .submit();
@@ -187,14 +190,14 @@ public class FirstLight {
         .password("invalid password")
         .connectionProperty(JDBC_CONNECTION_PROPERTIES, props)
         .build();
-         Connection conn = ds.getConnection(t -> System.out.println("ERROR: " + t.toString()))) {
+         Connection conn = ds.getConnection(t -> LOGGER.log(Level.FINE,"ERROR: " + t.toString()))) {
       conn.<Void>rowOperation(TRIVIAL)
           .collect(Collector.of(() -> null,
               (a, r) -> {
-                System.out.println("Trivial: " + r.get("1", String.class));
+                LOGGER.log(Level.FINE,"Trivial: " + r.get("1", String.class));
               },
               (x, y) -> null))
-          .onError( t -> { System.out.println(t.toString()); })
+          .onError( t -> { LOGGER.log(Level.FINE,t.toString()); })
           .submit();
     }
 
@@ -204,16 +207,16 @@ public class FirstLight {
         .password(PASSWORD)
         .connectionProperty(JDBC_CONNECTION_PROPERTIES, props)
         .build();
-         Connection conn = ds.getConnection(t -> System.out.println("ERROR: " + t.toString()))) {
+         Connection conn = ds.getConnection(t -> LOGGER.log(Level.FINE,"ERROR: " + t.toString()))) {
       conn.<Integer>rowOperation("select * from emp where empno = ?")
           .set("1", 7782)
           .collect(Collector.of(
               () -> null,
               (a, r) -> {
-                System.out.println("salary: $" + r.get("sal", Integer.class));
+                LOGGER.log(Level.FINE,"salary: $" + r.get("sal", Integer.class));
               },
               (l, r) -> null))
-          .onError( t -> { System.out.println(t.getMessage()); } )
+          .onError( t -> { LOGGER.log(Level.FINE,t.getMessage()); } )
           .submit();
     }
     ForkJoinPool.commonPool().awaitQuiescence(1, TimeUnit.MINUTES);
@@ -234,7 +237,7 @@ public class FirstLight {
         .password(PASSWORD)
         .connectionProperty(JDBC_CONNECTION_PROPERTIES, props)
         .build();
-         Connection conn = ds.getConnection(t -> System.out.println("ERROR: " + t.toString()))) {
+         Connection conn = ds.getConnection(t -> LOGGER.log(Level.FINE,"ERROR: " + t.toString()))) {
       Transaction trans = conn.transaction();
       CompletionStage<Integer> idF = conn.<Integer>rowOperation("select empno, ename from emp where ename = ? for update")
           .set("1", "CLARK", AdbaType.VARCHAR)
@@ -246,7 +249,7 @@ public class FirstLight {
           )
           .submit()
           .getCompletionStage();
-      idF.thenAccept( id -> { System.out.println("id: " + id); } );
+      idF.thenAccept( id -> { LOGGER.log(Level.FINE,"id: " + id); } );
       conn.<Long>countOperation("update emp set deptno = ? where empno = ?")
           .set("1", 50, AdbaType.INTEGER)
           .set("2", idF, AdbaType.INTEGER)
@@ -260,7 +263,7 @@ public class FirstLight {
           .onError(t -> t.printStackTrace())
           .submit()
           .getCompletionStage()
-          .thenAccept( c -> { System.out.println("updated rows: " + c); } );
+          .thenAccept( c -> { LOGGER.log(Level.FINE,"updated rows: " + c); } );
       conn.catchErrors();
       conn.commitMaybeRollback(trans);
     }
