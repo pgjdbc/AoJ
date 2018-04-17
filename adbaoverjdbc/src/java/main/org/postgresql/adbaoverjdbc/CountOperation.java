@@ -27,6 +27,9 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+
 
 /**
  *
@@ -34,7 +37,8 @@ import java.util.function.Function;
  */
 class CountOperation<T> extends ParameterizedOperation<T>
         implements ParameterizedCountOperation<T> {
-  
+
+  static private final Logger LOGGER = Logger.getLogger("org.postgresql.adbaoverjdbc.CountOperation");
   static private final Function DEFAULT_PROCESSOR = c -> null;
   
   /**
@@ -96,7 +100,7 @@ class CountOperation<T> extends ParameterizedOperation<T>
       setParameters.forEach((String k, ParameterValue v) -> {
         v.set(jdbcStatement, k);
       });
-      System.out.println("executeUpdate(\"" + sqlString + "\")");
+      LOGGER.log(Level.FINE,"executeUpdate(\"" + sqlString + "\")");
       long c = jdbcStatement.executeLargeUpdate();
       return countProcessor.apply(new Count(c));
     }

@@ -32,6 +32,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Connection is a subclass of OperationGroup. The member Operation stuff is mostly
@@ -47,6 +49,8 @@ import java.util.concurrent.Executor;
  * associated actions to a separate class.
  */
 class Connection extends OperationGroup<Object, Object> implements jdk.incubator.sql2.Connection {
+
+  private static final Logger LOGGER = Logger.getLogger("org.postgresql.adbaoverjdbc.Connection");
 
   // STATIC
   protected static final CompletionStage<Object> ROOT = CompletableFuture.completedFuture(null);
@@ -235,7 +239,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
     info.setProperty("user", (String) properties.get(AdbaConnectionProperty.USER));
     info.setProperty("password", (String) properties.get(AdbaConnectionProperty.PASSWORD));
     String url = (String) properties.get(AdbaConnectionProperty.URL);
-    System.out.println("DriverManager.getConnection(\"" + url + "\", " + info +")"); //DEBUG
+    LOGGER.log(Level.FINE,"DriverManager.getConnection(\"" + url + "\", " + info +")"); //DEBUG
     jdbcConnection = DriverManager.getConnection(url, info);
     jdbcConnection.setAutoCommit(false);
     setLifecycle(Connection.Lifecycle.OPEN);
@@ -253,7 +257,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
       case COMPLETE:
       case SERVER:
         int timeoutSeconds = (int) (op.getTimeoutMillis() / 1000L);
-        System.out.println("Connection.isValid(" + timeoutSeconds + ")"); //DEBUG
+        LOGGER.log(Level.FINE,"Connection.isValid(" + timeoutSeconds + ")"); //DEBUG
         if (!jdbcConnection.isValid(timeoutSeconds)) {
           throw new SqlException("validation failure", null, null, -1, null, -1);
         }
@@ -262,7 +266,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
       case SOCKET:
       case LOCAL:
       case NONE:
-        System.out.println("Connection.isClosed"); //DEBUG
+        LOGGER.log(Level.FINE,"Connection.isClosed"); //DEBUG
         if (jdbcConnection.isClosed()) {
           throw new SqlException("validation failure", null, null, -1, null, -1);
         }
@@ -279,7 +283,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
     try (java.sql.Statement stmt = jdbcConnection.createStatement()) {
       int timeoutSeconds = (int) (op.getTimeoutMillis() / 1000L);
       if (timeoutSeconds < 0) stmt.setQueryTimeout(timeoutSeconds);
-      System.out.println("Statement.execute(\"" + sql + "\")"); //DEBUG
+      LOGGER.log(Level.FINE,"Statement.execute(\"" + sql + "\")"); //DEBUG
       stmt.execute(sql);
     }
     catch (SQLException ex) {
@@ -292,7 +296,7 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
     try {
       setLifecycle(connectionLifecycle.close());
       if (jdbcConnection != null) {
-        System.out.println("Connection.close"); //DEBUG
+        LOGGER.log(Level.FINE,"Connection.close"); //DEBUG
         jdbcConnection.close();
       }
     }
@@ -307,19 +311,19 @@ class Connection extends OperationGroup<Object, Object> implements jdk.incubator
   }
 
   PreparedStatement prepareStatement(String sqlString) throws SQLException {
-    System.out.println("Connection.prepareStatement(\"" + sqlString + "\")"); //DEBUG
+    LOGGER.log(Level.FINE,"Connection.prepareStatement(\"" + sqlString + "\")"); //DEBUG
     return jdbcConnection.prepareStatement(sqlString);
   }
 
   TransactionOutcome jdbcEndTransaction(SimpleOperation<TransactionOutcome> op, Transaction trans) {
     try {
       if (trans.endWithCommit(this)) {
-        System.out.println("commit"); //DEBUG
+        LOGGER.log(Level.FINE,"commit"); //DEBUG
         jdbcConnection.commit();
         return TransactionOutcome.COMMIT;
       }
       else {
-        System.out.println("rollback"); //DEBUG
+        LOGGER.log(Level.FINE,"rollback"); //DEBUG
         jdbcConnection.rollback();
         return TransactionOutcome.ROLLBACK;
       }
